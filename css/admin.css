@@ -1,0 +1,34 @@
+#Clientes {
+    display:-webkit-box- flex;
+  }
+  h4.texto {
+    height: 20px;
+    width: 240px;
+    background-color: rgb(161, 191, 242);
+    border-radius: 3px solid black;
+    margin-right: 10px
+    
+  } 
+  
+  #matriz {
+    
+    height: 50px;
+    width: 150px;
+    padding: 10px;
+    margin: 60px;
+    box-sizing: content-box;
+  }
+
+  #lienzo{
+    position: absolute;
+    border: 2px solid;
+    background: #abc3b8;
+    height: 300px;
+    width: 750px;
+    padding: 40px 100px;; 
+    margin: 10px;
+    top: 400px;
+    left: 800px;
+  }
+
+

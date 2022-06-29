@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CSS only -->
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <!-- JavaScript Bundle with Popper -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="//d3js.org/d3.v5.min.js"></script>
+  <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
+  <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>  
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script type="text/javascript" src="js/html2canvas.js"></script>
+  <div class="login-box" style="display: none">
+    <h2>Login</h2>
+    <form>
+      <div class="user-box">
+        <input autocomplete="off" type="text" name="" required="">
+        <label>Username</label>
+      </div>
+      <div class="user-box">
+        <input autocomplete="off" type="password" name="" required="">
+        <label>Password</label>
+      </div>
+      <a href="#">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        Submit
+      </a>
+    </form>
+  </div>
+
+  <div id="admin">
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">MovieCat</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Home</a></li>
+          <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Panel de administrador <span
+                class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Cargas masivas</a></li>
+              <li><a href="#">BlockChain</a></li>
+              
+            </ul>
+          </li>
+          
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#" id="userLO"><span class="glyphicon glyphicon-user"></span> Sign Up</a>
+          </li>
+          <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="Cliente" id="Clientes">
+        <h4 class="texto">Cargar masiva de clientes</h4>
+        <input id="fileInput" type="file" size="100" onchange="processFilesUser(files, Clientes)">
+
+        <h4 class="texto">Cargar masiva de Libros</h4>
+        <input  id="fileInputLibros" type="file" size="100"
+          onchange="processFilesLigros(this.files, Thriller, Fantasia, Libros)">
+
+        <h4 class="texto">Cargar masiva de Autores</h4>
+        <input id="fileInputAutor" type="file" size="100">
+
+        <h4 class="texto">Cargar masiva de clientes</h4>
+        <input id="fileInput" type="file" size="100">
+        </div>
+        
+        <div class="cliente" id="fileOutput"></div>
+
+        <div id="matriz"class="btn-group-vertical">
+          <button class="btn btn-primary">
+            Grafo Peliculas
+          </button>
+          <button class="btn btn-primary" onclick="Clientes.graph()">
+            Grafo Clientes
+          </button class="btn btn-primary">
+          <button class="btn btn-primary">
+            Grafo Actores
+          </button class="btn btn-primary">
+          <button class="btn btn-primary">
+            Grafo Categorias
+          </button>
+        </div>
+        
+        <div id="lienzo">
+        
+          
+        </div>
+        <button id="boton-descarga" type="button" onclick="downloadCanvas('lienzo', 'GGrafoArbol')" class="btn btn-success">Descargar</button>
+
+
+        <script type="text/javascript" src="./js/Arboles/arbolAvl.js"></script>
+        <script type="text/javascript" src="./js/Lineales/ListaSimple.js"></script>
+        <script> 
+          function processFilesUser(files, Clientes) {
+            var file = files[0];
+            console.log(file)
+            var reader = new FileReader();
+      
+      
+            reader.onload = function (e) {
+              // Cuando éste evento se dispara, los datos están ya disponibles.
+              // Se trata de copiarlos a una área <div> en la página.
+              let jsona = JSON.parse(e.target.result);
+              n = 0;
+              while (n < jsona.length) {
+                Clientes.insertar(jsona[n].dpi, jsona[n].nombre_completo, jsona[n].nombre_usuario, jsona[n].correo, jsona[n].contrasenia, jsona[n].telefono)
+                console.log("GUARDADOS CON EXITO!!!")
+                n++;
+              }
+      
+              
+              
+      
+            }
+            reader.readAsText(file);
+          }
+        </script>
+
+    </div>
+  </div>
+</head>
+
+<body>
+
+</body>
+
+</html>
