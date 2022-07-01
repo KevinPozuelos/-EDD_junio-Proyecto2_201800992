@@ -1,6 +1,10 @@
 class NodoAvl {
-    constructor(valor) {
+    constructor(valor, nombre_pelicula, descripcion, puntuacion_star, precio_Q) {
         this.valor = valor;
+        this.nombre_pelicula = nombre_pelicula
+        this.descripcion = descripcion
+        this.puntuacion_star = puntuacion_star
+        this.precio_Q = precio_Q
         this.izquierdo = null;
         this.derecho = null;
         this.altura = 0;
@@ -22,15 +26,15 @@ class AVL {
         return nodo.altura;
     }
 
-    insertar(valor) {
-        this.raiz = this.add(valor, this.raiz);
+    insertar(valor, nombre_pelicula, descripcion, puntuacion_star, precio_Q) {
+        this.raiz = this.add(valor, nombre_pelicula, descripcion, puntuacion_star, precio_Q, this.raiz);
     }
 
-    add(valor, nodo) {
-        if (nodo == null) return new NodoAvl(valor);
+    add(valor, nombre_pelicula, descripcion, puntuacion_star, precio_Q, nodo) {
+        if (nodo == null) return new NodoAvl(valor, nombre_pelicula, descripcion, puntuacion_star, precio_Q);
         else {
             if (valor < nodo.valor) {
-                nodo.izquierdo = this.add(valor, nodo.izquierdo)
+                nodo.izquierdo = this.add(valor, nombre_pelicula, descripcion, puntuacion_star, precio_Q, nodo.izquierdo)
                 if (this.altura(nodo.derecho) - this.altura(nodo.izquierdo) == -2) {
                     if (valor < nodo.izquierdo.valor) {
                         nodo = this.RotacionIzquierda(nodo);
@@ -39,7 +43,7 @@ class AVL {
                     }
                 }
             } else if (valor > nodo.valor) {
-                nodo.derecho = this.add(valor, nodo.derecho);
+                nodo.derecho = this.add(valor, nombre_pelicula, descripcion, puntuacion_star, precio_Q, nodo.derecho);
                 if (this.altura(nodo.derecho) - this.altura(nodo.izquierdo) == 2) {
                     if (valor > nodo.derecho.valor) {
                         nodo = this.RotacionDerecha(nodo);
@@ -55,7 +59,7 @@ class AVL {
         return nodo;
     }
 
-    _
+ 
 
     RotacionIzquierda(nodo) {
         let aux = nodo.izquierdo;
@@ -102,7 +106,7 @@ class AVL {
         this.in_orden(this.raiz);
     }
 
-    in_orden(nodo) {
+    in_orden(nodo ) {
         if (nodo != null) {
             this.in_orden(nodo.izquierdo);
             console.log("Valor:", nodo.valor);
@@ -125,20 +129,21 @@ class AVL {
     graphRaiz=(nodo)=>{
         let graph = "";
         if(nodo.izquierdo == null && nodo.derecho == null){
-        graph += nodo.valor;
+        graph += '\"'+nodo.nombre_pelicula+'\"';
         } else {
             
             if(nodo.izquierdo != null){
             
-                graph += nodo.valor + "->"+ this.graphRaiz(nodo.izquierdo)+"\n";
+                graph += '\"'+nodo.nombre_pelicula+'\"' + "->"+ this.graphRaiz(nodo.izquierdo)+"\n";
             }
             if(nodo.derecho!= null){
-                graph+= nodo.valor + "->" + this.graphRaiz(nodo.derecho)+"\n";
+                graph+= '\"'+ nodo.nombre_pelicula +'\"'+ "->" + this.graphRaiz(nodo.derecho)+"\n";
             }
         }
         return graph
 
     }
+    
 
     dotGraph =() => {
         var codigodot = "digraph G\n"
@@ -153,15 +158,48 @@ class AVL {
             codigodot += this.graphRaiz(this.raiz); ;
         }
         codigodot += "\n}";
+        
         d3.select('#lienzo').graphviz()
-        .width(300)
+        .width(750)
         .height(750)
-        .renderDot(codigodot)
+        .renderDot(codigodot) 
         
         
         return console.log(codigodot);
     }
+
+    Listar() {
+        this.listarPelicula(this.raiz);
+    }
+
+    listarPelicula(nodo) {
+        if (nodo != null) {
+            this.listarPelicula(nodo.izquierdo);
+            var element = document.createElement("h3");
+            var contenido = document.createElement("p");
+            var boton = document.createElement("button");
+            var botonInfo = document.createElement("button");
+            var newContent = document.createTextNode(nodo.nombre_pelicula);
+            var newcontenido = document.createTextNode(nodo.descripcion);
+            var newboton = document.createTextNode("Aquilar");
+            var newbotonInfo = document.createTextNode("Info");
+            element.appendChild(newContent);
+            contenido.appendChild(newcontenido);
+            boton.appendChild(newboton);
+            botonInfo.appendChild(newbotonInfo);
+            boton.setAttribute("id", nodo.nombre_pelicula);
+            boton.setAttribute("onclick",'aquilar("'+nodo.nombre_pelicula+'")');
+            botonInfo.setAttribute("onclick",'info("'+nodo.nombre_pelicula+',Precio: Q'+nodo.precio_Q+',Puntuacion: '+nodo.puntuacion_star+'")');
+            
+            var currenttDiv = document.getElementById("Pelicula")
+            currenttDiv.innerHTML += element.outerHTML;
+            currenttDiv.innerHTML += contenido.outerHTML;
+            currenttDiv.innerHTML += boton.outerHTML;
+            currenttDiv.innerHTML += botonInfo.outerHTML;
+            console.log("Valor:", nodo.valor);
+            this.listarPelicula(nodo.derecho); 
+        }
+    }
 }
 
-var arbol = new AVL();
-    
+var Peliculas = new AVL();

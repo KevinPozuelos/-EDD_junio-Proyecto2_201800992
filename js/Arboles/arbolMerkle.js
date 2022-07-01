@@ -1,9 +1,185 @@
-import { sha256 } from "js-sha256"
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
+/*  SHA-256 implementation in JavaScript | (c) Chris Veness 2002-2010 | www.movable-type.co.uk    */
+/*   - see http://csrc.nist.gov/groups/ST/toolkit/secure_hashing.html                             */
+/*         http://csrc.nist.gov/groups/ST/toolkit/examples.html                                   */
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
+
+var Sha256 = {};  // Sha256 namespace
+
+/**
+ * Generates SHA-256 hash of string
+ *
+ * @param {String} msg                String to be hashed
+ * @param {Boolean} [utf8encode=true] Encode msg as UTF-8 before generating hash
+ * @returns {String}                  Hash of msg as hex character string
+ */
+Sha256.hash = function (msg, utf8encode) {
+    utf8encode = (typeof utf8encode == 'undefined') ? true : utf8encode;
+
+    // convert string to UTF-8, as SHA only deals with byte-streams
+    if (utf8encode) msg = Utf8.encode(msg);
+
+    // constants [§4.2.2]
+    var K = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2];
+    // initial hash value [§5.3.1]
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+
+    // PREPROCESSING 
+
+    msg += String.fromCharCode(0x80);  // add trailing '1' bit (+ 0's padding) to string [§5.1.1]
+
+    // convert string msg into 512-bit/16-integer blocks arrays of ints [§5.2.1]
+    var l = msg.length / 4 + 2;  // length (in 32-bit integers) of msg + ‘1’ + appended length
+    var N = Math.ceil(l / 16);   // number of 16-integer-blocks required to hold 'l' ints
+    var M = new Array(N);
+
+    for (var i = 0; i < N; i++) {
+        M[i] = new Array(16);
+        for (var j = 0; j < 16; j++) {  // encode 4 chars per integer, big-endian encoding
+            M[i][j] = (msg.charCodeAt(i * 64 + j * 4) << 24) | (msg.charCodeAt(i * 64 + j * 4 + 1) << 16) |
+                (msg.charCodeAt(i * 64 + j * 4 + 2) << 8) | (msg.charCodeAt(i * 64 + j * 4 + 3));
+        } // note running off the end of msg is ok 'cos bitwise ops on NaN return 0
+    }
+    // add length (in bits) into final pair of 32-bit integers (big-endian) [§5.1.1]
+    // note: most significant word would be (len-1)*8 >>> 32, but since JS converts
+    // bitwise-op args to 32 bits, we need to simulate this by arithmetic operators
+    M[N - 1][14] = ((msg.length - 1) * 8) / Math.pow(2, 32); M[N - 1][14] = Math.floor(M[N - 1][14])
+    M[N - 1][15] = ((msg.length - 1) * 8) & 0xffffffff;
+
+
+    // HASH COMPUTATION [§6.1.2]
+
+    var W = new Array(64); var a, b, c, d, e, f, g, h;
+    for (var i = 0; i < N; i++) {
+
+        // 1 - prepare message schedule 'W'
+        for (var t = 0; t < 16; t++) W[t] = M[i][t];
+        for (var t = 16; t < 64; t++) W[t] = (Sha256.sigma1(W[t - 2]) + W[t - 7] + Sha256.sigma0(W[t - 15]) + W[t - 16]) & 0xffffffff;
+
+        // 2 - initialise working variables a, b, c, d, e, f, g, h with previous hash value
+        a = H[0]; b = H[1]; c = H[2]; d = H[3]; e = H[4]; f = H[5]; g = H[6]; h = H[7];
+
+        // 3 - main loop (note 'addition modulo 2^32')
+        for (var t = 0; t < 64; t++) {
+            var T1 = h + Sha256.Sigma1(e) + Sha256.Ch(e, f, g) + K[t] + W[t];
+            var T2 = Sha256.Sigma0(a) + Sha256.Maj(a, b, c);
+            h = g;
+            g = f;
+            f = e;
+            e = (d + T1) & 0xffffffff;
+            d = c;
+            c = b;
+            b = a;
+            a = (T1 + T2) & 0xffffffff;
+        }
+        // 4 - compute the new intermediate hash value (note 'addition modulo 2^32')
+        H[0] = (H[0] + a) & 0xffffffff;
+        H[1] = (H[1] + b) & 0xffffffff;
+        H[2] = (H[2] + c) & 0xffffffff;
+        H[3] = (H[3] + d) & 0xffffffff;
+        H[4] = (H[4] + e) & 0xffffffff;
+        H[5] = (H[5] + f) & 0xffffffff;
+        H[6] = (H[6] + g) & 0xffffffff;
+        H[7] = (H[7] + h) & 0xffffffff;
+    }
+
+    return Sha256.toHexStr(H[0]) + Sha256.toHexStr(H[1]) + Sha256.toHexStr(H[2]) + Sha256.toHexStr(H[3]) +
+        Sha256.toHexStr(H[4]) + Sha256.toHexStr(H[5]) + Sha256.toHexStr(H[6]) + Sha256.toHexStr(H[7]);
+}
+
+Sha256.ROTR = function (n, x) { return (x >>> n) | (x << (32 - n)); }
+Sha256.Sigma0 = function (x) { return Sha256.ROTR(2, x) ^ Sha256.ROTR(13, x) ^ Sha256.ROTR(22, x); }
+Sha256.Sigma1 = function (x) { return Sha256.ROTR(6, x) ^ Sha256.ROTR(11, x) ^ Sha256.ROTR(25, x); }
+Sha256.sigma0 = function (x) { return Sha256.ROTR(7, x) ^ Sha256.ROTR(18, x) ^ (x >>> 3); }
+Sha256.sigma1 = function (x) { return Sha256.ROTR(17, x) ^ Sha256.ROTR(19, x) ^ (x >>> 10); }
+Sha256.Ch = function (x, y, z) { return (x & y) ^ (~x & z); }
+Sha256.Maj = function (x, y, z) { return (x & y) ^ (x & z) ^ (y & z); }
+
+//
+// hexadecimal representation of a number 
+//   (note toString(16) is implementation-dependant, and  
+//   in IE returns signed numbers when used on full words)
+//
+Sha256.toHexStr = function (n) {
+    var s = "", v;
+    for (var i = 7; i >= 0; i--) { v = (n >>> (i * 4)) & 0xf; s += v.toString(16); }
+    return s;
+}
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
+/*  Utf8 class: encode / decode between multi-byte Unicode characters and UTF-8 multiple          */
+/*              single-byte character encoding (c) Chris Veness 2002-2010                         */
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
+
+var Utf8 = {};  // Utf8 namespace
+
+/**
+ * Encode multi-byte Unicode string into utf-8 multiple single-byte characters 
+ * (BMP / basic multilingual plane only)
+ *
+ * Chars in range U+0080 - U+07FF are encoded in 2 chars, U+0800 - U+FFFF in 3 chars
+ *
+ * @param {String} strUni Unicode string to be encoded as UTF-8
+ * @returns {String} encoded string
+ */
+Utf8.encode = function (strUni) {
+    // use regular expressions & String.replace callback function for better efficiency 
+    // than procedural approaches
+    var strUtf = strUni.replace(
+        /[\u0080-\u07ff]/g,  // U+0080 - U+07FF => 2 bytes 110yyyyy, 10zzzzzz
+        function (c) {
+            var cc = c.charCodeAt(0);
+            return String.fromCharCode(0xc0 | cc >> 6, 0x80 | cc & 0x3f);
+        }
+    );
+    strUtf = strUtf.replace(
+        /[\u0800-\uffff]/g,  // U+0800 - U+FFFF => 3 bytes 1110xxxx, 10yyyyyy, 10zzzzzz
+        function (c) {
+            var cc = c.charCodeAt(0);
+            return String.fromCharCode(0xe0 | cc >> 12, 0x80 | cc >> 6 & 0x3F, 0x80 | cc & 0x3f);
+        }
+    );
+    return strUtf;
+}
+
+/**
+ * Decode utf-8 encoded string back into multi-byte Unicode characters
+ *
+ * @param {String} strUtf UTF-8 string to be decoded back to Unicode
+ * @returns {String} decoded string
+ */
+Utf8.decode = function (strUtf) {
+    // note: decode 3-byte chars first as decoded 2-byte strings could appear to be 3-byte char!
+    var strUni = strUtf.replace(
+        /[\u00e0-\u00ef][\u0080-\u00bf][\u0080-\u00bf]/g,  // 3-byte chars
+        function (c) {  // (note parentheses for precence)
+            var cc = ((c.charCodeAt(0) & 0x0f) << 12) | ((c.charCodeAt(1) & 0x3f) << 6) | (c.charCodeAt(2) & 0x3f);
+            return String.fromCharCode(cc);
+        }
+    );
+    strUni = strUni.replace(
+        /[\u00c0-\u00df][\u0080-\u00bf]/g,                 // 2-byte chars
+        function (c) {  // (note parentheses for precence)
+            var cc = (c.charCodeAt(0) & 0x1f) << 6 | c.charCodeAt(1) & 0x3f;
+            return String.fromCharCode(cc);
+        }
+    );
+    return strUni;
+}
+
 
 //Clase Nodo para lista temporal de carga de datos
-class NodoListaTemporal{
-    //Constructor
-    constructor(datTemporal){
+class NodoListaTemporal {
+    //Constructor   
+    constructor(datTemporal) {
         this.datTemporal = datTemporal
         this.siguiente = null
         this.anterior = null
@@ -14,25 +190,25 @@ var contadorglobal = 0
 var salida = ""
 
 //Clase Lista temporal para carga de datos
-class ListaTemporal{
+class ListaTemporal {
     //Constructor
-    constructor(){
+    constructor() {
         this.cabeza = null
         this.cola = null
         this.size = 0
     }
 
     //Metodo Insertar en lista temporal
-    insertLista(dato){
+    insertLista(dato) {
         let nodo = new NodoListaTemporal(dato);
         //Insercion de primer nodo
-        if(this.cabeza == null){
+        if (this.cabeza == null) {
             this.cabeza = nodo;
             this.cola = nodo;
             this.size++;
-        }else if(this.cabeza != null){ // Insercion de nodo No Cabeza
+        } else if (this.cabeza != null) { // Insercion de nodo No Cabeza
             let aux = this.cabeza;
-            while(aux != this.cola){
+            while (aux != this.cola) {
                 aux = aux.siguiente;
             }
             aux.siguiente = nodo;
@@ -43,19 +219,19 @@ class ListaTemporal{
     }
 
     //Metodo Eliminar par alista temporal
-    eliminarLista(dato){
+    eliminarLista(dato) {
         let nodo = this.cabeza
-        if(this.cabeza.datTemporal == dato && this.cabeza == this.cola){
+        if (this.cabeza.datTemporal == dato && this.cabeza == this.cola) {
             //Dato unico eliminado
             this.cabeza = null
             this.cola = null
             this.size = 0
             return
         }
-        while(nodo.datTemporal != dato && nodo != this.cola){
+        while (nodo.datTemporal != dato && nodo != this.cola) {
             nodo = nodo.siguiente
         }
-        if(nodo.datTemporal== dato && nodo.anterior == null && nodo.siguiente != null){
+        if (nodo.datTemporal == dato && nodo.anterior == null && nodo.siguiente != null) {
             //Dato Eliminado en el al inicio
             let tmp = nodo.siguiente
             this.cabeza = tmp
@@ -63,7 +239,7 @@ class ListaTemporal{
             nodo.siguiente = null
             this.size--
             return
-        }else if(nodo.datTemporal == dato && nodo.siguiente != null && nodo.anterior != null){
+        } else if (nodo.datTemporal == dato && nodo.siguiente != null && nodo.anterior != null) {
             //Dato Eliminado en el centro
             let tmp = nodo.siguiente
             tmp.anterior = nodo.anterior
@@ -72,7 +248,7 @@ class ListaTemporal{
             nodo.anterior = null
             this.size--
             return
-        }else if(nodo.datTemporal == dato && nodo.siguiente == null && nodo.anterior != null){
+        } else if (nodo.datTemporal == dato && nodo.siguiente == null && nodo.anterior != null) {
             //Dato eliminado al final de la lista
             let tmp = nodo.anterior
             this.cola = tmp
@@ -81,7 +257,7 @@ class ListaTemporal{
             this.size--
             return
         }
-        if(nodo == null){
+        if (nodo == null) {
             //Dato no encontrado
             console.log("No se encontro el dato a eliminar")
             return
@@ -93,9 +269,9 @@ class ListaTemporal{
 var recarga = []
 
 //Clase Nodo para arbol merkle
-class Nodo{
+class Nodo {
     //Constructor
-    constructor(dato, izquierda, derecha, nodohijo){
+    constructor(dato, izquierda, derecha, nodohijo) {
         this.dato = dato
         this.hash = null
         this.id = 0
@@ -106,22 +282,22 @@ class Nodo{
 }
 
 //Clase Arbol Merkle
-class MerkleTree{
+class MerkleTree {
     //Constructor
-    constructor(){
+    constructor() {
         this.raiz = null
     }
 
     //Metodo Insertar en arbol Merkle
-    insertar(dato){
+    insertar(dato) {
         let nodo = new Nodo(dato, null, null, true)
         //Insercion de primer nodo
-        if(this.raiz == null){
+        if (this.raiz == null) {
             let listatmp = new ListaTemporal()
             listatmp.insertLista(nodo)
             listatmp.insertLista(new Nodo(-1, null, null, true))
-            this.construirArbol(listatmp)           
-        }else{  //Insercion de Nodo no primero
+            this.construirArbol(listatmp)
+        } else {  //Insercion de Nodo no primero
             let listatmp = this.ObtenerLista()
             listatmp.insertLista(nodo)
             this.construirArbol(listatmp)
@@ -132,7 +308,7 @@ class MerkleTree{
     }
 
     //Metodo de Carga de datos en lista temporal para insercion de arbol
-    ObtenerLista(){
+    ObtenerLista() {
         let listatmp = new ListaTemporal()
         this.obtenerlista(listatmp, this.raiz.izquierda)
         this.obtenerlista(listatmp, this.raiz.derecha)
@@ -140,10 +316,10 @@ class MerkleTree{
     }
 
     //Sub metodo de carga de datos en lista temporal para insercion de arbol
-    obtenerlista(lista, nodo){
-        if(nodo != null){
+    obtenerlista(lista, nodo) {
+        if (nodo != null) {
             this.obtenerlista(lista, nodo.izquierda)
-            if(nodo != null && nodo.dato != -1 && nodo.nodohijo == true){
+            if (nodo != null && nodo.dato != -1 && nodo.nodohijo == true) {
                 lista.insertLista(nodo)
             }
             this.obtenerlista(lista, nodo.derecha)
@@ -151,23 +327,23 @@ class MerkleTree{
     }
 
     //Metodo para armado base de arbol
-    construirArbol(lista){
+    construirArbol(lista) {
         let tamanio = new Float64Array(lista.size)
         let cant = 1
-        let operacion = tamanio.length/2
+        let operacion = tamanio.length / 2
         //Calculo de nodos actuales
-        while (operacion > 1){
+        while (operacion > 1) {
             cant++
-            operacion = operacion/2
+            operacion = operacion / 2
         }
         let vectorTotal = new Float64Array(cant)
         let totalnodos = Math.pow(2, vectorTotal.length)    //Calculo de nodos hijos para arbol merkle
         //Complemetacion de nodos hijo para arbol merkle final
-        while(lista.size < Math.floor(totalnodos)){
-            lista.insertLista(new Nodo(-1,null,null,true))
+        while (lista.size < Math.floor(totalnodos)) {
+            lista.insertLista(new Nodo(-1, null, null, true))
         }
         //Insercion de datos en arbol
-        while(lista.size>1){
+        while (lista.size > 1) {
             let primero = lista.cabeza
             let segundo = primero.siguiente
             lista.eliminarLista(primero.datTemporal)
@@ -175,9 +351,9 @@ class MerkleTree{
             let nodo1 = primero.datTemporal
             nodo1.id = contadorglobal + 1
             let nodo2 = segundo.datTemporal
-            nodo2.id = contadorglobal + 2 
+            nodo2.id = contadorglobal + 2
             let suma = nodo1.dato + nodo2.dato
-            let nuevo = new Nodo(suma, nodo1, nodo2,false)
+            let nuevo = new Nodo(suma, nodo1, nodo2, false)
             nuevo.id = contadorglobal
             lista.insertLista(nuevo)
             contadorglobal = contadorglobal + 3
@@ -187,8 +363,8 @@ class MerkleTree{
     }
 
     //Metodo Asignacion de Hash
-    hashing(){
-        if(this.raiz ==null){
+    hashing() {
+        if (this.raiz == null) {
             console.log("No existe arbol")
             return
         }
@@ -196,11 +372,9 @@ class MerkleTree{
     }
 
     //SubMetodo Asignacion de Hash
-    subHashing(nodo){
-        if(nodo != null){
-            let hasheo = sha256.create()
-            hasheo.update(String(nodo.dato))
-            hasheo.hex()
+    subHashing(nodo) {
+        if (nodo != null) {
+            let hasheo = Sha256.hash(String(nodo.dato))
             nodo.hash = hasheo
             this.subHashing(nodo.izquierda)
             this.subHashing(nodo.derecha)
@@ -208,8 +382,8 @@ class MerkleTree{
     }
 
     //Metodo Imprimir
-    imprimiendo(){
-        if(this.raiz ==null){
+    imprimiendo() {
+        if (this.raiz == null) {
             console.log("No existe arbol")
             return
         }
@@ -217,8 +391,8 @@ class MerkleTree{
     }
 
     //SubMetodo Imprimir
-    imprimir(nodo){
-        if(nodo != null){
+    imprimir(nodo) {
+        if (nodo != null) {
             console.log(nodo.dato + " Es el dato")
             console.log(nodo.hash + " Es el Hash")
             this.imprimir(nodo.izquierda)
@@ -226,235 +400,33 @@ class MerkleTree{
         }
     }
 
-    //Metodo Buscar
-    buscando(dato){
-        if(this.raiz ==null){
-            console.log("No existe arbol")
-            return
-        }
-        let hasheo = sha256.create()
-        hasheo.update(String(dato))
-        hasheo.hex()
-        let nodo = this.raiz
-        this.buscar(hasheo, nodo)
-    }
-
-    //SubMetodo Buscar
-    buscar(hasheo, nodo){
-        if(nodo!= null){
-            let noha = nodo.hash.hex()
-            let has = hasheo.hex()
-            if(has == noha && nodo.nodohijo == true){
-                console.log(nodo.hash + " fue encontrado para "+nodo.dato)
-                return
-            }
-            this.buscar(hasheo, nodo.izquierda)
-            this.buscar(hasheo, nodo.derecha)
-        }
-    }
-
-    //Metodo Eliminar
-    Eliminar(dato){
-        if(this.raiz ==null){
-            console.log("No existe arbol")
-            return
-        }
-        let hasheo = sha256.create()
-        hasheo.update(String(dato))
-        hasheo.hex()
-        let nodo = this.raiz
-        this.eliminando(hasheo, nodo)
-    }
-
-    //SubMetodo Eliminar
-    eliminando(hasheo, nodo){
-        if(nodo!= null){
-            let noha = nodo.hash.hex()
-            let has = hasheo.hex()
-            if(has == noha && nodo.nodohijo == true){
-                nodo.nodohijo = false
-                this.cargaArbolLista()
-                this.raiz = null
-                for(let i = 0;i<recarga.length;i++){
-                    this.insertar(recarga[i])
-                }
-                recarga = []
-                this.hashing()
-                console.log("Dato Eliminado")
-                return
-            }
-            this.eliminando(hasheo, nodo.izquierda)
-            this.eliminando(hasheo, nodo.derecha)
-        }
-    }
-    
-    //Metodo cargarlista para reestructuracion del arbol
-    cargaArbolLista(){
-        if(this.raiz ==null){
-            console.log("No existe arbol")
-            return
-        }
-        let nodo = this.raiz
-        this.cargandoArbolLista(nodo)
-    }
-
-    //SubMetodo Cargando lista para reestructuracion del arbol
-    cargandoArbolLista(nodo){
-        if(nodo!= null){
-            if(nodo.nodohijo == true && nodo.dato != -1){
-                recarga.push(nodo.dato)
-            }
-            this.cargandoArbolLista(nodo.izquierda)
-            this.cargandoArbolLista(nodo.derecha)
-        }
-    }
-
-    //Metodo Modificar
-    modificar(datoelim, nuevodato){
-        if(this.raiz ==null){
-            console.log("No existe arbol")
-            return
-        }
-        let hasheo = sha256.create()
-        hasheo.update(String(datoelim))
-        hasheo.hex()
-        let nodo = this.raiz
-        this.modificando(hasheo, nuevodato, nodo)
-    }
 
 
 
 
-    
-    //SubMetodo modificar
-    modificando(hasheo, nuevodato, nodo){
-        if(nodo!= null){
-            let noha = nodo.hash.hex()
-            let has1 = hasheo.hex()
-            if(has1 == noha && nodo.nodohijo == true){
-                nodo.dato = nuevodato
-                this.cargaArbolLista()
-                this.raiz = null
-                for(let i = 0;i<recarga.length;i++){
-                    this.insertar(recarga[i])
-                }
-                recarga = []
-                this.hashing()
-                console.log("Dato Modificado")
-                return
-            }
-            this.modificando(hasheo, nuevodato, nodo.izquierda)
-            this.modificando(hasheo, nuevodato, nodo.derecha)
-        }
-    }
-
-    //Metodo Cargar
-    cargar(arreglo) {
-        arreglo.map(elemento => {
-            this.insertar(elemento);
-        })
-    }
-
-    //Metodo Guardar
-    guardando(){
-        if(this.raiz==null){
-            console.log("no existe arbol")
-            return
-        }
-        let nodo = this.raiz;
-        this.guardar(nodo)
-    }
-
-    //Metodo Guardar
-    guardar(){
-        let vector = []
-        return this.preOrden(this.raiz, vector);
-    }
-
-    preOrden(nodo,vector){
-        if(nodo != null){
-        vector.push(nodo.dato)
-        this.preOrden(nodo.izquierda,vector)
-        this.preOrden(nodo.derecha,vector)
+    preOrden(nodo, vector) {
+        if (nodo != null) {
+            vector.push(nodo.dato)
+            this.preOrden(nodo.izquierda, vector)
+            this.preOrden(nodo.derecha, vector)
         }
         return vector
     }
 
-    graficarNodos(nodo,vector,datoBuscar){
-
-        if(nodo.izquierda == null && nodo.derecha == null){
-            let dato
-            if(datoBuscar == nodo.dato){
-                dato = {id: nodo.dato, label: nodo.dato.toString(), color: "lime"}
-            }else{
-                dato = {id: nodo.dato, label: nodo.dato.toString(),}
-            }
-            
-            vector.push(dato)
-        }else{
-            let dato
-            if(datoBuscar == nodo.dato){
-                dato = {id: nodo.dato, label: nodo.dato.toString(), color: "lime"}
-            }else{
-                dato = {id: nodo.dato, label: nodo.dato.toString(),}
-            }
-            
-            vector.push(dato)
-        }
-        
-        if(nodo.izquierda != null){
-            this.graficarNodos(nodo.izquierda,vector,datoBuscar)
-        }
-
-        if (nodo.derecha != null){
-            this.graficarNodos(nodo.derecha,vector,datoBuscar)
-        }
-
-        return vector
-    }
-
-    obtenerNodos(datoBuscar){
-        let vector = []
-
-        return this.graficarNodos(this.raiz,vector,datoBuscar)
-    }
-
-    graficarApuntadores(nodo,vector){
-
-        if(nodo.izquierda != null){
-            this.graficarApuntadores(nodo.izquierda,vector)
-            let edge = {from:nodo.dato, to:nodo.izquierda.dato}
-            vector.push(edge)
-        }
-
-        if (nodo.derecha != null){
-            this.graficarApuntadores(nodo.derecha,vector)
-            let edge = {from:nodo.dato, to:nodo.derecha.dato}
-            vector.push(edge)
-        }
-
-        return vector
-    }
-
-    obtenerAputadores(){
-        let vector = []
-
-        return this.graficarApuntadores(this.raiz,vector)
-    }
 
     //Metodo Graficar
-    graficar(valorBuscar){
-        
+    graficar(valorBuscar) {
+
         salida = ""
-        if(this.raiz == null){
+        if (this.raiz == null) {
             console.log("No hay nada aun")
             return
         }
         let nodo = this.raiz
         let contador = 0
-        salida+= "digraph G{\nnode[shape=record]\nedge[color=\"green\"]\n"
-        this.graficando(nodo,valorBuscar)
-        salida+= "}"
+        salida += "digraph G{\nnode[shape=record]\nedge[color=\"green\"]\n"
+        this.graficando(nodo, valorBuscar)
+        salida += "}"
         console.log(salida)
         contador = 0
 
@@ -462,33 +434,39 @@ class MerkleTree{
     }
 
     //SubMetodo Buscar
-    graficando(nodo,valorBuscar){
-        if(nodo!= null){
-            if(valorBuscar == nodo.dato){
-                salida += "node"+nodo.id+" [color=\"green\" label = \" iz| "+nodo.dato+"|"+nodo.hash.hex()+" |de \"]; \n"
-            }else{
-                salida += "node"+nodo.id+" [label = \" iz| "+nodo.dato+"|"+nodo.hash.hex()+" |de \"]; \n"
+    graficando(nodo, valorBuscar) {
+        if (nodo != null) {
+            if (valorBuscar == nodo.dato) {
+                salida += "node" + nodo.id + " [color=\"green\" label = \"  " + nodo.dato + "|" + nodo.hash + " \"]; \n"
+            } else {
+                salida += "node" + nodo.id + " [label = \"  " + nodo.dato + "|" + nodo.hash + "  \"]; \n"
             }
-            if(nodo.derecha != null){
-                salida += "node"+nodo.id + " -> node" +nodo.derecha.id + "\n"
+            if (nodo.derecha != null) {
+                salida += "node" + nodo.id + " -> node" + nodo.derecha.id + "\n"
             }
-            if(nodo.izquierda != null){
-                salida+= "node"+nodo.id + " -> node" + nodo.izquierda.id + "\n"
+            if (nodo.izquierda != null) {
+                salida += "node" + nodo.id + " -> node" + nodo.izquierda.id + "\n"
             }
-            if(nodo.izquierda!=null){
-                this.graficando(nodo.izquierda,valorBuscar)
+            if (nodo.izquierda != null) {
+                this.graficando(nodo.izquierda, valorBuscar)
             }
-            if(nodo.derecha != null){
-                this.graficando(nodo.derecha,valorBuscar)
+            if (nodo.derecha != null) {
+                this.graficando(nodo.derecha, valorBuscar)
             }
         }
+
+    }
+
+    getMerkleRoot() {
+        return console.log("Raiz del arbol de Merkle " + this.raiz.hash)
     }
 }
-var treeHash = new MerkleTree()
-treeHash.insertar(1)
-treeHash.insertar(2)
-treeHash.insertar(3)
-treeHash.insertar(4)
-treeHash.insertar(5)
-treeHash.insertar(6)
-treeHash.insertar(7)
+
+let Transacciones = new MerkleTree()
+Transacciones.insertar("transaccion 1")
+Transacciones.insertar("transaccion 2")
+Transacciones.insertar("transaccion 3")
+Transacciones.insertar("transaccion 4")
+Transacciones.insertar("transaccion 5")
+Transacciones.insertar("transaccion 6")
+Transacciones.graficar("transaccion 1")

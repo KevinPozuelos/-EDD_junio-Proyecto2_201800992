@@ -39,6 +39,20 @@ class ListaSimple {
         }
     }
 
+    buscar = (nombre_usuario, pw) => {
+        let aux = this.raiz;
+        while(aux != null){
+            if(aux.nombre_usuario == nombre_usuario && aux.contrasenia == pw){
+                console.log("Usuario existe");
+                return true;
+            }
+            aux = aux.siguiente;
+            if(aux == this.primero){
+                break;
+            }
+        }
+    }
+
     graph = () => {
         var codigodot = "digraph G{\nbgcolor=none\nrankdir=LR;\nlabel=\" Usuarios \";\nnode [shape=box];\n nodesep=1;\n" + "node [shape=record fontname=Arial]\n;";
         var temp = this.raiz
@@ -59,13 +73,12 @@ class ListaSimple {
         codigodot += nodes + "\n"
         codigodot += "//agregando conexiones o flechas\n"
         codigodot += "\n" + conexiones + "\n}\n}"
-        d3.select('#lienzo').graphviz()
+        var svg =d3.select('#lienzo').graphviz()
         .width(500)
         .height(200)
         .renderDot(codigodot)
-        
-        return console.log(codigodot);
-    }
 
+    }
 }
 let Clientes = new ListaSimple();
+Clientes.insertar("2354168452525", "WIlfred Perez", "EDD", "edd@gmail.com", "123", "+502 (123) 123-4567");

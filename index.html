@@ -13,31 +13,48 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script src="//d3js.org/d3.v5.min.js"></script>
   <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
-  <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>  
+  <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-  <script type="text/javascript" src="js/html2canvas.js"></script>
-  <div class="login-box" style="display: none">
-    <h2>Login</h2>
-    <form>
-      <div class="user-box">
-        <input autocomplete="off" type="text" name="" required="">
-        <label>Username</label>
+
+
+</head>
+
+<body>
+  <div class="container py-5 h-100" id="login" >
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-2-strong" style="border-radius: 1rem;">
+          <div class="card-body p-5 text-center">
+
+            <h3 class="mb-5">Sign in</h3>
+
+            <div class="form-outline mb-4">
+              <input type="email" id="user" class="form-control form-control-lg" />
+              <label class="form-label" for="user">User</label>
+            </div>
+
+            <div class="form-outline mb-4">
+              <input type="password" id="pw" class="form-control form-control-lg" />
+              <label class="form-label" for="pw">Password</label>
+            </div>
+
+            <!-- Checkbox -->
+            <div class="form-check d-flex justify-content-start mb-4">
+              <input class="form-check-input" type="checkbox" value="admin" id="Roll" />
+              <label class="form-check-label" for="form1Example3"> Administrador </label>
+            </div>
+
+            <button class="btn btn-primary btn-lg btn-block" type="submit" onclick="login(Clientes, Peliculas)">Login</button>
+
+            <hr class="my-4">
+          </div>
+        </div>
       </div>
-      <div class="user-box">
-        <input autocomplete="off" type="password" name="" required="">
-        <label>Password</label>
-      </div>
-      <a href="#">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        Submit
-      </a>
-    </form>
+    </div>
   </div>
 
-  <div id="admin">
+
+  <div id="admin" style="display: none">
     <nav class="navbar navbar-inverse">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -50,15 +67,15 @@
             <ul class="dropdown-menu">
               <li><a href="#">Cargas masivas</a></li>
               <li><a href="#">BlockChain</a></li>
-              
+
             </ul>
           </li>
-          
+
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="#" id="userLO"><span class="glyphicon glyphicon-user"></span> Sign Up</a>
+          <li><a href="#" id="userLO1"><span class="glyphicon glyphicon-user"></span> Log-in</a>
           </li>
-          <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+          <li onclick="enablediv1()"><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
         </ul>
       </div>
     </nav>
@@ -68,75 +85,221 @@
         <h4 class="texto">Cargar masiva de clientes</h4>
         <input id="fileInput" type="file" size="100" onchange="processFilesUser(files, Clientes)">
 
-        <h4 class="texto">Cargar masiva de Libros</h4>
-        <input  id="fileInputLibros" type="file" size="100"
-          onchange="processFilesLigros(this.files, Thriller, Fantasia, Libros)">
+        <h4 class="texto">Cargar masiva de Peliculas</h4>
+        <input id="fileInputLibros" type="file" size="100" onchange="processFilesPelis(this.files, Peliculas)">
 
-        <h4 class="texto">Cargar masiva de Autores</h4>
-        <input id="fileInputAutor" type="file" size="100">
+        <h4 class="texto">Cargar masiva de Actores</h4>
+        <input id="fileInputAutor" type="file" size="100" onchange="processFilesActor(this.files, Actores)">
 
-        <h4 class="texto">Cargar masiva de clientes</h4>
-        <input id="fileInput" type="file" size="100">
-        </div>
-        
-        <div class="cliente" id="fileOutput"></div>
+        <h4 class="texto">Cargar masiva de Categorias</h4>
+        <input id="fileInput" type="file" size="100" onchange="processFilesCategoria(this.files, Categorias)">
+      </div>
 
-        <div id="matriz"class="btn-group-vertical">
-          <button class="btn btn-primary">
-            Grafo Peliculas
-          </button>
-          <button class="btn btn-primary" onclick="Clientes.graph()">
-            Grafo Clientes
-          </button class="btn btn-primary">
-          <button class="btn btn-primary">
-            Grafo Actores
-          </button class="btn btn-primary">
-          <button class="btn btn-primary">
-            Grafo Categorias
-          </button>
-        </div>
-        
-        <div id="lienzo">
-        
-          
-        </div>
-        <button id="boton-descarga" type="button" onclick="downloadCanvas('lienzo', 'GGrafoArbol')" class="btn btn-success">Descargar</button>
+      <div class="cliente" id="fileOutput"></div>
+
+      <div id="matriz" class="btn-group-vertical">
+        <button class="btn btn-primary" onclick="Peliculas.dotGraph()">
+          Grafo Peliculas
+        </button>
+        <button class="btn btn-primary" onclick="Clientes.graph()">
+          Grafo Clientes
+        </button class="btn btn-primary">
+        <button class="btn btn-primary" onclick="Actores.dotGraph()">
+          Grafo Actores
+        </button class="btn btn-primary">
+        <button onclick="Categorias.graph()" class="btn btn-primary">
+          Grafo Categorias
+        </button>
+      </div>
+
+      <div id="lienzo">
 
 
-        <script type="text/javascript" src="./js/Arboles/arbolAvl.js"></script>
-        <script type="text/javascript" src="./js/Lineales/ListaSimple.js"></script>
-        <script> 
-          function processFilesUser(files, Clientes) {
-            var file = files[0];
-            console.log(file)
-            var reader = new FileReader();
-      
-      
-            reader.onload = function (e) {
-              // Cuando éste evento se dispara, los datos están ya disponibles.
-              // Se trata de copiarlos a una área <div> en la página.
-              let jsona = JSON.parse(e.target.result);
-              n = 0;
-              while (n < jsona.length) {
-                Clientes.insertar(jsona[n].dpi, jsona[n].nombre_completo, jsona[n].nombre_usuario, jsona[n].correo, jsona[n].contrasenia, jsona[n].telefono)
-                console.log("GUARDADOS CON EXITO!!!")
-                n++;
-              }
-      
-              
-              
-      
+      </div>
+      <button id="boton-descarga" type="button" onclick="downloadCanvas('lienzo', 'GGrafoArbol')"
+        class="btn btn-success">Descargar</button>
+
+
+
+      <script type="text/javascript" src="./js/Lineales/ListaSimple.js"></script>
+      <script type="text/javascript" src="./js/Hash/tablaHash.js"></script>
+      <script type="text/javascript" src="./js/Arboles/arbolAvl.js"></script>
+      <script type="text/javascript" src="./js/Arboles/bts.js"></script>
+
+      <!-- Seccion de Scripts -->
+      <script>
+        function processFilesUser(files, Clientes) {
+          var file = files[0];
+          console.log(file)
+          var reader = new FileReader();
+
+
+          reader.onload = function (e) {
+
+            let jsona = JSON.parse(e.target.result);
+            n = 0;
+            while (n < jsona.length) {
+              Clientes.insertar(jsona[n].dpi, jsona[n].nombre_completo, jsona[n].nombre_usuario, jsona[n].correo, jsona[n].contrasenia, jsona[n].telefono)
+              console.log("GUARDADOS CON EXITO!!!")
+              n++;
             }
-            reader.readAsText(file);
           }
-        </script>
+          reader.readAsText(file);
+        }
+
+
+        function processFilesPelis(files, Peliculas) {
+          var file = files[0];
+          console.log(file)
+          var reader = new FileReader();
+
+
+          reader.onload = function (e) {
+            let jsona = JSON.parse(e.target.result);
+            n = 0;
+            while (n < jsona.length) {
+              Peliculas.insertar(jsona[n].id_pelicula, jsona[n].nombre_pelicula, jsona[n].descripcion, jsona[n].puntuacion_star, jsona[n].precio_Q)
+              console.log("GUARDADOS CON EXITO!!!")
+              n++;
+            }
+          }
+          reader.readAsText(file);
+
+        }
+
+        function processFilesActor(files, Actores) {
+          var file = files[0];
+          console.log(file)
+          var reader = new FileReader();
+
+
+          reader.onload = function (e) {
+            let jsona = JSON.parse(e.target.result);
+            n = 0;
+            while (n < jsona.length) {
+              Actores.insertar(jsona[n].dni, jsona[n].nombre_actor, jsona[n].correo, jsona[n].descripcion)
+              console.log("GUARDADOS CON EXITO!!!")
+              n++;
+            }
+          }
+          reader.readAsText(file);
+
+        }
+
+        function processFilesCategoria(files, Categorias) {
+          var file = files[0];
+          console.log(file)
+          var reader = new FileReader();
+
+
+          reader.onload = function (e) {
+            let jsona = JSON.parse(e.target.result);
+            n = 0;
+            while (n < jsona.length) {
+              Categorias.InsertarNodoHash(jsona[n].id_categoria, jsona[n].company)
+              console.log("GUARDADOS CON EXITO!!!")
+              n++;
+            }
+          }
+          reader.readAsText(file);
+
+        }
+        function login(Clientes,Peliculas) {
+          var usuario = document.getElementById("user").value;
+          var password = document.getElementById("pw").value;
+          var flag = document.getElementById("Roll").checked;
+          if (usuario == "EDD" && password == "123" && flag == true) {
+            enablediv()
+            document.getElementById("userLO1").textContent = "EDD"
+            console.log("Aceptado")
+          }else if(Clientes.buscar(usuario, password)){
+            enablediv3()
+            document.getElementById("userLO").textContent = usuario
+            Peliculas.Listar();
+            console.log("Aceptado")
+          }
+        }
+
+        function enablediv() {
+          document.getElementById("login").style.display = "none";
+          document.getElementById("admin").style.display = "";
+          }
+
+          function enablediv1() {
+            document.getElementById("login").style.display = "";
+            document.getElementById("admin").style.display = "none";
+            document.getElementById("userLO1").textContent = "Log-in"
+            }
+            function enablediv3() {
+              document.getElementById("login").style.display = "none";
+              document.getElementById("Cliente").style.display = "";
+              }
+
+              function enablediv2() {
+                document.getElementById("login").style.display = "";
+                document.getElementById("Cliente").style.display = "none";
+                document.getElementById("userLO1").textContent = "Log-in"
+                }
+
+                function aquilar(valor){
+                 let data = (document.getElementById("userLO").textContent+"-"+valor)
+                  console.log(data)
+                  document.getElementById(valor).style.display = "none";
+                }
+
+                function info(nombre){
+                  alert("Nombre:"+nombre)
+                 }
+      </script>
 
     </div>
   </div>
-</head>
 
-<body>
+  <div id="Cliente" style="display:none">
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">MovieCat</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li  class="active"><a href="#">Home</a></li>
+          <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">CARGA <span
+                class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Peliculas</a></li>
+              <li><a href="#">Actores</a></li>
+              <li><a href="#">Categorias</a></li>
+            </ul>
+          </li>
+          <li><a href="#">IMAGENES</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li onclick="enablediv()"><a href="#" id="userLO"><span class="glyphicon glyphicon-user"></span> Sign Up</a>
+          </li>
+          <li onclick="enablediv2()"><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+        </ul>
+      </div>
+    </nav>
 
+    <div class="container">
+      <div id="Pelicula">
+        <select name="select">
+          <option value="value1"selected>Ordenar</option>
+          <option value="value2">Ascendente</option>
+          <option value="value3">Descendiente</option>
+        </select>
+      </div>
+
+      <div id="Actores" style="display: none">
+       
+      </div>
+
+      <div id="Categorias" style="display: none">
+    
+      </div>
+
+    </div>
+  </div>
 </body>
 
 </html>

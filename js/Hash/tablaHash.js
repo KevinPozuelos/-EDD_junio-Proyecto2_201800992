@@ -1,8 +1,8 @@
-class listaHash { // Lista
+class NodoHash { // Lista
     constructor(clave, valor) {
         this.clave = null;
         this.valor = valor;
-        this.key = clave % 20;
+        this.llave = clave % 20;
         this.next = null;
         this.list = null;
     }
@@ -17,8 +17,8 @@ class Tabla_Hash {
     }
 
     getHash(clave) {
-        let key = clave % 20;
-        return key;
+        let llave = clave % 20;
+        return llave;
     }
 
     create_List() {
@@ -28,26 +28,26 @@ class Tabla_Hash {
     }
 
     insert(clave, valor) {
-        let node = new listaHash(clave, valor);
+        let hash = new NodoHash(clave, valor);
 
         if (this.head === null) {
-            this.head = node;
+            this.head = hash;
         } else {
             let temp = this.head;
             while (temp.next != null) {
                 temp = temp.next;
             }
-            temp.next = node;
+            temp.next = hash;
         }
     }
 
-    insert2(clave, valor) {
-        let node = new listaHash(clave, valor);
-        let key = this.getHash(clave, valor);
+    InsertarNodoHash(clave, valor) {
+        let hash = new NodoHash(clave, valor);
+        let llave = this.getHash(clave, valor);
         let temp = this.head;
-        node.clave = clave;
+        hash.clave = clave;
 
-        while (temp.key != key) {
+        while (temp.llave != llave) {
             temp = temp.next;
         }
         if (temp.valor === null) {
@@ -55,22 +55,32 @@ class Tabla_Hash {
             temp.valor = valor;
         } else {
             if (temp.list === null) {
-                temp.list = node;
+                //if (temp.clave == clave) {
+                    //return;
+                //}
+                temp.list = hash;
             } else {
+
                 let temp_ = temp.list;
+                //if (temp_.clave == clave) {
+                    //return;
+               //}
                 while (temp_.list != null) {
+                    //if (temp_.clave == clave) {
+                        //return;
+                    //}
                     temp_ = temp_.list;
                 }
-                temp_.list = node;
+                temp_.list = hash;
             }
         }
     }
 
     buscar(clave) {
-        let key = this.getHash(clave % 20);
+        let llave = this.getHash(clave % 30);
         let temp = this.head;
 
-        while (temp.key != key) {
+        while (temp.llave != llave) {
             temp = temp.next;
         }
 
@@ -107,17 +117,17 @@ class Tabla_Hash {
         let rand = 0;
         let rowInfo = "{rank=same;";
         while (temp) {
-            str += "Head" + count + " [label=\"Head: " + temp.key + " : " + temp.valor + "\"];\n";
-            rowInfo += "Head" + count + ";";
+            str += "Nodo" + count + " [label=\"Nodo: " + temp.llave + " -> Valor: " + temp.valor + "\"];\n";
+            rowInfo += "Nodo" + count + ";";
             temp = temp.next;
             count++;
         }
         temp = this.head;
-        str += "Head" + 0;
+        str += "Nodo" + 0;
         count = 1;
         temp = temp.next;
         while (temp) {
-            str += " -> Head" + count;
+            str += "  Nodo" + count;
             temp = temp.next;
             count++;
         }
@@ -125,18 +135,20 @@ class Tabla_Hash {
 
         temp = this.head;
         count = 0;
+        rand = 0;
         while (temp) {
-            //str += "Head" + count +  " label[\"Head: " + temp.key + " : " + temp.clave + "\"]\n";
+            //str += "Head" + count +  " label[\"Head: " + temp.llave + " : " + temp.clave + "\"]\n";
             let temp_ = temp.list;
             if (temp_ != null) {
-                str += "Head" + count + " -> List" + temp_.valor + ";\n";
+                str += "Nodo" + count + " -> Valor" + rand + ";\n";
             }
             while (temp_) {
-                str += "List" + temp_.valor +  " [label=\" List: " + temp_.valor + "\"];\n";
-                if(temp_.list != null){
-                    str += "List" + temp_.valor + " -> List" + temp_.list.valor + ";\n";
+                str += "Valor" + rand + " [ label=\" Valor: " + temp_.valor + "\"];\n";
+                if (temp_.list != null) {
+                    str += "Valor" + rand + " -> Valor" + (rand+1) + ";\n";
                 }
                 temp_ = temp_.list;
+                rand++;
             }
             temp = temp.next;
             count++;
@@ -145,25 +157,19 @@ class Tabla_Hash {
     }
 
     graph() {
-        let str = "digraph structs\n{\nrankdir=\"L\"\nlabel=\"Carnet: 201612174\"\nnode [shape=box];\n";
+        let str = "digraph structs\n{\nrankdir=\"LR\"\nlabel=\"Categorias\"\nnode [shape=signature];\n";
         str += this.graficadora();
         str += "}";
         console.log("Successfully wrote to the file.");
         console.log(str);
+        d3.select('#lienzo').graphviz()
+        .width(500)
+        .height(1200)
+        .renderDot(str)
+
+        return console.log(str)
     }
 }
 
-let test = new Tabla_Hash();
-test.insert2(444,"sdas");
-test.insert2(24,"weq");
-test.insert2(44, "qwerty");
-test.insert2(123,"kevin");
-test.insert2(523,"kevinR");
-test.insert2(123421,"raul");
-test.insert2(8213, "raulR");
-test.insert2(124,"juan");
-test.insert2(14205,"juanR");
-test.insert2(12523,"maria");
-test.insert2(12490, "mariaR");
-test.insert2(19203,"jose");
-test.graph();
+Categorias = new Tabla_Hash();
+
