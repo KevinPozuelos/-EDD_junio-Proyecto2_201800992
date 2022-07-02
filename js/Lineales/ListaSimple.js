@@ -53,6 +53,20 @@ class ListaSimple {
         }
     }
 
+    buscarRetorno = (nombre_usuario, pw) => {
+        let aux = this.raiz;
+        while(aux != null){
+            if(aux.nombre_usuario == nombre_usuario && aux.contrasenia == pw){
+                console.log("Usuario existe");
+                return aux.nombre_completo
+            }
+            aux = aux.siguiente;
+            if(aux == this.primero){
+                break;
+            }
+        }
+    }
+
     graph = () => {
         var codigodot = "digraph G{\nbgcolor=none\nrankdir=LR;\nlabel=\" Usuarios \";\nnode [shape=box];\n nodesep=1;\n" + "node [shape=record fontname=Arial]\n;";
         var temp = this.raiz

@@ -427,10 +427,14 @@ class MerkleTree {
         salida += "digraph G{\nnode[shape=record]\nedge[color=\"green\"]\n"
         this.graficando(nodo, valorBuscar)
         salida += "}"
-        console.log(salida)
+        
         contador = 0
+        d3.select('#merkle').graphviz()
+        .width(750)
+        .height(400)
+        .renderDot(salida) 
 
-        return salida
+        return console.log(salida)
     }
 
     //SubMetodo Buscar
@@ -463,10 +467,4 @@ class MerkleTree {
 }
 
 let Transacciones = new MerkleTree()
-Transacciones.insertar("transaccion 1")
-Transacciones.insertar("transaccion 2")
-Transacciones.insertar("transaccion 3")
-Transacciones.insertar("transaccion 4")
-Transacciones.insertar("transaccion 5")
-Transacciones.insertar("transaccion 6")
 Transacciones.graficar(0)

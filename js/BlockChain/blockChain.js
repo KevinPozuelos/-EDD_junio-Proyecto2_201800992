@@ -176,35 +176,37 @@ Utf8.decode = function (strUtf) {
 }
 class Bloque {
     constructor(rootMerkle) {
-        this.id =0;
-        this.timestamp = timestamp;
-        this.data = data;
-        this.nonce = nonce;
-        this.preHash = preHash;
+        this.id = 0;
+        this.timestamp = "";
+        this.nonce = 0
+        this.preHash = "00"
         this.rootMerkle = rootMerkle;
-        this.hash = this.getHash()
-        this.left = null;
-        this.right = null
-    }
-    getHash() {
-        return Sha256.hash(this.id +this.timestamp + this.preHash + this.rootMerkle + this.nonce)
-    }
-}
+        this.hash = ""
 
-class BlockChain {
-    constructor() {
-        this.createGenesisBlock()
     }
-
-    createGenesisBlock() {
+    setdate = () => {
         var today = new Date();
         var now = today.toLocaleDateString('en-US')
         var nowh = today.toLocaleTimeString('en-US');
-
         let TimeStamp = now + nowh
         console.log(TimeStamp.toString())
+        return TimeStamp.toString()
+    }
 
-
-        return new Bloque(TimeStamp.toString(), "Genesis Block", 0, "00", "0", "0")
+    crearBloque = (merkleRoot) => {
+        var flag = true;
+        this.timestamp = this.setdate()
+        let cambiarDatos = this.id + timestamp + preHash + merkleRoot
+        while (flag) {
+            let aux = (cambiarDatos + this.nonce)
+            this.hash = Sha256.hash(aux)
+            if (this.hash.substring(0, 1) == "00") {
+                this.preHash = this.hash
+                break
+            }
+            this.nonce++
+        }
+        this.id++
     }
 }
+

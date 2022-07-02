@@ -8,7 +8,7 @@
   <!-- CSS only -->
   <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  
+
   <!-- JavaScript Bundle with Popper -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
@@ -67,8 +67,8 @@
           <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Panel de administrador <span
                 class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="#">Cargas masivas</a></li>
-              <li><a href="#">BlockChain</a></li>
+              <li onclick ="cargadiv()"><a href="#">Cargas masivas</a></li>
+              <li onclick="blockdiv()"><a href="#">BlockChain</a></li>
 
             </ul>
           </li>
@@ -83,43 +83,54 @@
     </nav>
 
     <div class="container">
-      <div class="Cliente" id="Clientes">
-        <h4 class="texto">Cargar masiva de clientes</h4>
-        <input id="fileInput" type="file" size="100" onchange="processFilesUser(files, Clientes)">
+      <div id="cargamasiva">
+        <div class="Cliente" id="Clientes">
+          <h4 class="texto">Cargar masiva de clientes</h4>
+          <input id="fileInput" type="file" size="100" onchange="processFilesUser(files, Clientes)">
 
-        <h4 class="texto">Cargar masiva de Peliculas</h4>
-        <input id="fileInputLibros" type="file" size="100" onchange="processFilesPelis(this.files, Peliculas)">
+          <h4 class="texto">Cargar masiva de Peliculas</h4>
+          <input id="fileInputLibros" type="file" size="100" onchange="processFilesPelis(this.files, Peliculas)">
 
-        <h4 class="texto">Cargar masiva de Actores</h4>
-        <input id="fileInputAutor" type="file" size="100" onchange="processFilesActor(this.files, Actores)">
+          <h4 class="texto">Cargar masiva de Actores</h4>
+          <input id="fileInputAutor" type="file" size="100" onchange="processFilesActor(this.files, Actores)">
 
-        <h4 class="texto">Cargar masiva de Categorias</h4>
-        <input id="fileInput" type="file" size="100" onchange="processFilesCategoria(this.files, Categorias)">
+          <h4 class="texto">Cargar masiva de Categorias</h4>
+          <input id="fileInput" type="file" size="100" onchange="processFilesCategoria(this.files, Categorias)">
+        </div>
+        <div class="cliente" id="fileOutput"></div>
+
+        <div id="matriz" class="btn-group-vertical">
+          <button class="btn btn-primary" onclick="Peliculas.dotGraph()">
+            Grafo Peliculas
+          </button>
+          <button class="btn btn-primary" onclick="Clientes.graph()">
+            Grafo Clientes
+          </button class="btn btn-primary">
+          <button class="btn btn-primary" onclick="Actores.dotGraph()">
+            Grafo Actores
+          </button class="btn btn-primary">
+          <button onclick="Categorias.graph()" class="btn btn-primary">
+            Grafo Categorias
+          </button>
+        </div>
+
+        <div id="lienzo">
+
+
+        </div>
+        <button id="boton-descarga" type="button" onclick="downloadCanvas('lienzo', 'GGrafoArbol')"
+          class="btn btn-success">Descargar</button>
+
+
+      </div>
+      <div id="blockchain" style="display:none">
+        <h4>contador</h4>
+        
+        <input id="contador" onChange="testTimer()">
+
+        <div id="merkle"></div>
       </div>
 
-      <div class="cliente" id="fileOutput"></div>
-
-      <div id="matriz" class="btn-group-vertical">
-        <button class="btn btn-primary" onclick="Peliculas.dotGraph()">
-          Grafo Peliculas
-        </button>
-        <button class="btn btn-primary" onclick="Clientes.graph()">
-          Grafo Clientes
-        </button class="btn btn-primary">
-        <button class="btn btn-primary" onclick="Actores.dotGraph()">
-          Grafo Actores
-        </button class="btn btn-primary">
-        <button onclick="Categorias.graph()" class="btn btn-primary">
-          Grafo Categorias
-        </button>
-      </div>
-
-      <div id="lienzo">
-
-
-      </div>
-      <button id="boton-descarga" type="button" onclick="downloadCanvas('lienzo', 'GGrafoArbol')"
-        class="btn btn-success">Descargar</button>
 
 
 
@@ -127,9 +138,14 @@
       <script type="text/javascript" src="./js/Hash/tablaHash.js"></script>
       <script type="text/javascript" src="./js/Arboles/arbolAvl.js"></script>
       <script type="text/javascript" src="./js/Arboles/bts.js"></script>
+      <script type="text/javascript" src="./js/Arboles/arbolMerkle.js"></script>
 
       <!-- Seccion de Scripts -->
       <script>
+
+        
+        var Transaccion = new MerkleTree()
+        
         function processFilesUser(files, Clientes) {
           var file = files[0];
           console.log(file)
@@ -213,10 +229,12 @@
           if (usuario == "EDD" && password == "123" && flag == true) {
             enablediv()
             document.getElementById("userLO1").textContent = "EDD"
+            
             console.log("Aceptado")
           } else if (Clientes.buscar(usuario, password)) {
+            let nombre = Clientes.buscarRetorno(usuario, password)
             enablediv3()
-            document.getElementById("userLO").textContent = usuario
+            document.getElementById("userLO").textContent = nombre
             Peliculas.Listar();
             Peliculas.ListarComentarios();
             Categorias.graph1()
@@ -227,6 +245,15 @@
         function enablediv() {
           document.getElementById("login").style.display = "none";
           document.getElementById("admin").style.display = "";
+        }
+
+        function blockdiv() {
+          document.getElementById("cargamasiva").style.display = "none";
+          document.getElementById("blockchain").style.display = "";
+        }
+        function cargadiv() {
+          document.getElementById("cargamasiva").style.display = "";
+          document.getElementById("blockchain").style.display = "none";
         }
 
         function enablediv1() {
@@ -246,22 +273,29 @@
         }
 
         function aquilar(valor) {
-          let data = (document.getElementById("userLO").textContent + "-" + valor)
+          let data = (document.getElementById("userLO").textContent + " - " + valor)
           console.log(data)
           document.getElementById(valor).style.display = "none";
+          Transaccion.insertar(data)
+          Transaccion.graficar(0)
         }
         function aquilar1(valor) {
-          let data = (document.getElementById("userLO").textContent + "-" + valor)
+          let data = (document.getElementById("userLO").textContent + " - " + valor)
+          Transaccion.insertar(data)
+          Transaccion.graficar(0)
           console.log(data)
-          document.getElementById("1"+valor).style.display = "none";
+          document.getElementById("1" + valor).style.display = "none";
+          return data
         }
-        function comentar(valor){
-            
-            var Comentario = document.getElementById("3"+valor);
-            var div = document.getElementById("2"+valor);
-            
-            div.innerHTML += "<br>"+ "<b>" + document.getElementById("userLO").textContent + ":</b> "+ Comentario.value 
-            Comentario.value = "";
+
+        
+        function comentar(valor) {
+
+          var Comentario = document.getElementById("3" + valor);
+          var div = document.getElementById("2" + valor);
+
+          div.innerHTML += "<br>" + "<b>" + document.getElementById("userLO").textContent + ":</b> " + Comentario.value
+          Comentario.value = "";
         }
 
         function info(nombre) {
@@ -306,15 +340,38 @@
           document.getElementById("Actores").style.display = "none";
           document.getElementById("Pelicula").style.display = "none";
           document.getElementById("Categorias").style.display = "none";
-          
+
         }
         function enablediv7() {
           document.getElementById("PeliculaChat").style.display = "none";
           document.getElementById("Actores").style.display = "none";
           document.getElementById("Pelicula").style.display = "none";
           document.getElementById("Categorias").style.display = "";
+
+        }
+        var cont =0
+        function timer(){
+            
+            var contador = document.getElementById("contador");
+            cont++;
+            contador.value = cont+" segundos";
+            
+            console.log(cont)
+            
           
         }
+        var tope = 300000
+        var alquiler = false
+        function testTimer(){
+            var contador = document.getElementById("contador");
+            cont = 0;
+            contador.value =cont
+           
+          }
+          
+       
+        setInterval("timer()",1000);
+        setInterval("testTimer()",tope);
       </script>
 
     </div>
@@ -332,7 +389,7 @@
                 class="caret"></span></a>
             <ul class="dropdown-menu">
               <li onclick="enablediv6()"><a href="#">Peliculas</a></li>
-              <li onclick ="enablediv4()"><a href="#">Actores</a></li>
+              <li onclick="enablediv4()"><a href="#">Actores</a></li>
               <li onclick="enablediv7()"><a href="#">Categorias</a></li>
             </ul>
           </li>
@@ -384,7 +441,7 @@
       </div>
 
       <div id="Categorias" style="display: none">
-          <h1>CATEGORIA</h1>
+        <h1>CATEGORIA</h1>
       </div>
 
     </div>
