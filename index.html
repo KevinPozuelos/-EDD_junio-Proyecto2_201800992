@@ -8,6 +8,7 @@
   <!-- CSS only -->
   <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  
   <!-- JavaScript Bundle with Popper -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
@@ -20,7 +21,7 @@
 </head>
 
 <body>
-  <div class="container py-5 h-100" id="login" >
+  <div class="container py-5 h-100" id="login">
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col-12 col-md-8 col-lg-6 col-xl-5">
         <div class="card shadow-2-strong" style="border-radius: 1rem;">
@@ -44,7 +45,8 @@
               <label class="form-check-label" for="form1Example3"> Administrador </label>
             </div>
 
-            <button class="btn btn-primary btn-lg btn-block" type="submit" onclick="login(Clientes, Peliculas)">Login</button>
+            <button class="btn btn-primary btn-lg btn-block" type="submit"
+              onclick="login(Clientes, Peliculas)">Login</button>
 
             <hr class="my-4">
           </div>
@@ -204,7 +206,7 @@
           reader.readAsText(file);
 
         }
-        function login(Clientes,Peliculas) {
+        function login(Clientes, Peliculas) {
           var usuario = document.getElementById("user").value;
           var password = document.getElementById("pw").value;
           var flag = document.getElementById("Roll").checked;
@@ -212,10 +214,12 @@
             enablediv()
             document.getElementById("userLO1").textContent = "EDD"
             console.log("Aceptado")
-          }else if(Clientes.buscar(usuario, password)){
+          } else if (Clientes.buscar(usuario, password)) {
             enablediv3()
             document.getElementById("userLO").textContent = usuario
             Peliculas.Listar();
+            Peliculas.ListarComentarios();
+            Categorias.graph1()
             console.log("Aceptado")
           }
         }
@@ -223,33 +227,94 @@
         function enablediv() {
           document.getElementById("login").style.display = "none";
           document.getElementById("admin").style.display = "";
-          }
+        }
 
-          function enablediv1() {
-            document.getElementById("login").style.display = "";
-            document.getElementById("admin").style.display = "none";
-            document.getElementById("userLO1").textContent = "Log-in"
-            }
-            function enablediv3() {
-              document.getElementById("login").style.display = "none";
-              document.getElementById("Cliente").style.display = "";
-              }
+        function enablediv1() {
+          document.getElementById("login").style.display = "";
+          document.getElementById("admin").style.display = "none";
+          document.getElementById("userLO1").textContent = "Log-in"
+        }
+        function enablediv3() {
+          document.getElementById("login").style.display = "none";
+          document.getElementById("Cliente").style.display = "";
+        }
 
-              function enablediv2() {
-                document.getElementById("login").style.display = "";
-                document.getElementById("Cliente").style.display = "none";
-                document.getElementById("userLO1").textContent = "Log-in"
-                }
+        function enablediv2() {
+          document.getElementById("login").style.display = "";
+          document.getElementById("Cliente").style.display = "none";
+          document.getElementById("userLO1").textContent = "Log-in"
+        }
 
-                function aquilar(valor){
-                 let data = (document.getElementById("userLO").textContent+"-"+valor)
-                  console.log(data)
-                  document.getElementById(valor).style.display = "none";
-                }
+        function aquilar(valor) {
+          let data = (document.getElementById("userLO").textContent + "-" + valor)
+          console.log(data)
+          document.getElementById(valor).style.display = "none";
+        }
+        function aquilar1(valor) {
+          let data = (document.getElementById("userLO").textContent + "-" + valor)
+          console.log(data)
+          document.getElementById("1"+valor).style.display = "none";
+        }
+        function comentar(valor){
+            
+            var Comentario = document.getElementById("3"+valor);
+            var div = document.getElementById("2"+valor);
+            
+            div.innerHTML += "<br>"+ "<b>" + document.getElementById("userLO").textContent + ":</b> "+ Comentario.value 
+            Comentario.value = "";
+        }
 
-                function info(nombre){
-                  alert("Nombre:"+nombre)
-                 }
+        function info(nombre) {
+          alert("Nombre:" + nombre)
+        }
+
+        function inOrdenActores(Actores) {
+          Actores.ListarinOrden()
+          document.getElementById("inOrden").style.display = "";
+          document.getElementById("PreOrden").style.display = "none";
+          document.getElementById("posOrden").style.display = "none";
+        }
+
+        function preOrdenActores(Actores) {
+          Actores.ListapreOrden()
+          document.getElementById("PreOrden").style.display = "";
+          document.getElementById("inOrden").style.display = "none";
+          document.getElementById("posOrden").style.display = "none";
+        }
+
+        function posOrdenActores(Actores) {
+          Actores.ListapostOrden()
+          document.getElementById("PreOrden").style.display = "none";
+          document.getElementById("inOrden").style.display = "none";
+          document.getElementById("posOrden").style.display = "";
+        }
+
+        function enablediv4() {
+          document.getElementById("Pelicula").style.display = "none";
+          document.getElementById("Actores").style.display = "";
+          document.getElementById("PeliculaChat").style.display = "none";
+          document.getElementById("Categorias").style.display = "none";
+        }
+        function enablediv5() {
+          document.getElementById("Pelicula").style.display = "";
+          document.getElementById("Actores").style.display = "none";
+          document.getElementById("PeliculaChat").style.display = "none";
+          document.getElementById("Categorias").style.display = "none";
+        }
+        function enablediv6() {
+          document.getElementById("PeliculaChat").style.display = "";
+          document.getElementById("Actores").style.display = "none";
+          document.getElementById("Pelicula").style.display = "none";
+          document.getElementById("Categorias").style.display = "none";
+          
+        }
+        function enablediv7() {
+          document.getElementById("PeliculaChat").style.display = "none";
+          document.getElementById("Actores").style.display = "none";
+          document.getElementById("Pelicula").style.display = "none";
+          document.getElementById("Categorias").style.display = "";
+          
+        }
       </script>
 
     </div>
@@ -262,13 +327,13 @@
           <a class="navbar-brand" href="#">MovieCat</a>
         </div>
         <ul class="nav navbar-nav">
-          <li  class="active"><a href="#">Home</a></li>
+          <li class="active" onclick="enablediv5()"><a href="#">Home</a></li>
           <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">CARGA <span
                 class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="#">Peliculas</a></li>
-              <li><a href="#">Actores</a></li>
-              <li><a href="#">Categorias</a></li>
+              <li onclick="enablediv6()"><a href="#">Peliculas</a></li>
+              <li onclick ="enablediv4()"><a href="#">Actores</a></li>
+              <li onclick="enablediv7()"><a href="#">Categorias</a></li>
             </ul>
           </li>
           <li><a href="#">IMAGENES</a></li>
@@ -284,18 +349,42 @@
     <div class="container">
       <div id="Pelicula">
         <select name="select">
-          <option value="value1"selected>Ordenar</option>
+          <option value="value1" selected>Ordenar</option>
           <option value="value2">Ascendente</option>
           <option value="value3">Descendiente</option>
         </select>
       </div>
 
+      <div id="PeliculaChat" style="display: none">
+
+      </div>
+
       <div id="Actores" style="display: none">
-       
+        <h1>Actores</h1>
+        <p>Seleccione un ordenamiento</p>
+        <input type="radio" id="html" name="fav_language" value="HTML" onclick="inOrdenActores(Actores)">
+        <label for="html">InOrden</label><br>
+        <input type="radio" id="css" name="fav_language" value="CSS" onclick="preOrdenActores(Actores)">
+        <label for="css">PreOrden</label><br>
+        <input type="radio" id="javascript" name="fav_language" value="JavaScript" onclick="posOrdenActores(Actores)">
+        <label for="javascript">PosOrden</label>
+
+
+        <div id="inOrden">
+
+        </div>
+        <div id="PreOrden">
+
+        </div>
+
+        <div id="posOrden">
+
+        </div>
+
       </div>
 
       <div id="Categorias" style="display: none">
-    
+          <h1>CATEGORIA</h1>
       </div>
 
     </div>

@@ -200,6 +200,54 @@ class AVL {
             this.listarPelicula(nodo.derecho); 
         }
     }
+
+    ListarComentarios() {
+        this.listarPeliculaC(this.raiz);
+    }
+
+    listarPeliculaC(nodo) {
+        if (nodo != null) {
+            this.listarPeliculaC(nodo.izquierdo);
+            var element = document.createElement("h2");
+            var contenido = document.createElement("p");
+            var boton = document.createElement("button");
+            var inputC = document.createElement("input");
+            var precio = document.createElement("h4");
+            var botonInfo = document.createElement("button");
+            var comentario = document.createElement("div");
+            var comentarioTilulo = document.createElement("h3");
+            var newContent = document.createTextNode(nodo.nombre_pelicula);
+            var newcontenido = document.createTextNode(nodo.descripcion);
+            var newPrecio = document.createTextNode("Precio: Q"+nodo.precio_Q);
+            var newboton = document.createTextNode("Alquilar");
+            var newbotonInfo = document.createTextNode("Comentar");
+            var newcomentario = document.createTextNode("Comentario");
+            element.appendChild(newContent);
+            contenido.appendChild(newcontenido);
+            boton.appendChild(newboton);
+            botonInfo.appendChild(newbotonInfo);
+            precio.appendChild(newPrecio);
+            comentarioTilulo.appendChild(newcomentario);
+            comentario.appendChild(comentarioTilulo);
+            
+           
+            boton.setAttribute("id", "1"+nodo.nombre_pelicula);
+            boton.setAttribute("onclick",'aquilar1("'+nodo.nombre_pelicula+'")');
+            botonInfo.setAttribute("onclick",'comentar("'+ nodo.nombre_pelicula + '")');
+            comentario.setAttribute("id", "2"+nodo.nombre_pelicula);
+            inputC.setAttribute("id", "3"+nodo.nombre_pelicula);
+            var currenttDiv = document.getElementById("PeliculaChat")
+            currenttDiv.innerHTML += element.outerHTML;
+            currenttDiv.innerHTML += contenido.outerHTML;
+            currenttDiv.innerHTML += boton.outerHTML;
+            currenttDiv.innerHTML += botonInfo.outerHTML;
+            currenttDiv.innerHTML += inputC.outerHTML;
+            currenttDiv.innerHTML += precio.outerHTML;
+            currenttDiv.innerHTML += comentario.outerHTML;
+            console.log("Valor:", nodo.valor);
+            this.listarPeliculaC(nodo.derecho); 
+        }
+    }
 }
 
 var Peliculas = new AVL();

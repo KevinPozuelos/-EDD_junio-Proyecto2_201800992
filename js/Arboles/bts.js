@@ -130,6 +130,68 @@ class ABB {
         }
     }
 
+    ListarinOrden() {
+        this.Listarin_orden(this.raiz);
+    }
+
+    Listarin_orden(nodo) {
+        if (nodo != null) {
+            this.Listarin_orden(nodo.izquierdo);
+            var element = document.createElement("h3");
+            var contenido = document.createElement("p");
+            var newTitile = document.createTextNode(nodo.nombre_actor)
+            var newContenido = document.createTextNode(nodo.descripcion)
+            element.appendChild(newTitile);
+            contenido.appendChild(newContenido);
+
+            var contenedor = document.getElementById("inOrden");
+            contenedor.innerHTML += element.outerHTML;
+            contenedor.innerHTML += contenido.outerHTML;
+            console.log("dni:", nodo.dni);
+            this.Listarin_orden(nodo.derecho);
+        }
+    }
+
+    ListapreOrden() {
+        this.Listapre_orden(this.raiz);
+    }
+
+    Listapre_orden(nodo) {
+        if (nodo != null) {
+            var element = document.createElement("h3");
+            var contenido = document.createElement("p");
+            var newTitile = document.createTextNode(nodo.nombre_actor)
+            var newContenido = document.createTextNode(nodo.descripcion)
+            element.appendChild(newTitile);
+            contenido.appendChild(newContenido);
+
+            var contenedor = document.getElementById("PreOrden");
+            contenedor.innerHTML += element.outerHTML;
+            contenedor.innerHTML += contenido.outerHTML;
+            this.Listapre_orden(nodo.izquierdo);
+            this.Listapre_orden(nodo.derecho);
+        }
+    }
+    ListapostOrden() {
+        this.Listapost_orden(this.raiz);
+    }
+    Listapost_orden(nodo) {
+        if (nodo != null) {
+            this.Listapost_orden(nodo.izquierdo);
+            this.Listapost_orden(nodo.derecho);
+            var element = document.createElement("h3");
+            var contenido = document.createElement("p");
+            var newTitile = document.createTextNode(nodo.nombre_actor)
+            var newContenido = document.createTextNode(nodo.descripcion)
+            element.appendChild(newTitile);
+            contenido.appendChild(newContenido);
+
+            var contenedor = document.getElementById("posOrden");
+            contenedor.innerHTML += element.outerHTML;
+            contenedor.innerHTML += contenido.outerHTML;
+        }
+    }
+
 
 }
 

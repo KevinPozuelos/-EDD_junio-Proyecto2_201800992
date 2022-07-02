@@ -100,10 +100,10 @@ class Tabla_Hash {
     display() {
         let temp = this.head;
         while (temp) {
-            console.log("Head: " + temp.clave);
+            console.log("Head: " + temp.valor);
             let temp_ = temp.list;
             while (temp_) {
-                console.log("List: " + temp_.clave);
+                console.log("List: " + temp_.valor);
                 temp_ = temp_.list;
             }
             temp = temp.next;
@@ -169,7 +169,22 @@ class Tabla_Hash {
 
         return console.log(str)
     }
+
+    graph1() {
+        let str = "digraph structs\n{\nrankdir=\"LR\"\nlabel=\"Categorias\"\nnode [shape=signature];\n";
+        str += this.graficadora();
+        str += "}";
+        console.log("Successfully wrote to the file.");
+        console.log(str);
+        d3.select('#Categorias').graphviz()
+        .width(500)
+        .height(1200)
+        .renderDot(str)
+
+        return console.log(str)
+    }
+
+   
 }
 
 Categorias = new Tabla_Hash();
-
