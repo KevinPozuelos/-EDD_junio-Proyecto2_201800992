@@ -126,7 +126,9 @@
       <div id="blockchain" style="display:none">
         <h4>contador</h4>
         <button onclick="crearBloqueChainManual()">Crear Bloque</button>
-        
+        <h4>Cambiar tiempo</h4>
+        <input id="tiempo">
+        <button onclick="cambiarTiempo()">Cambiar</button>
         <input id="contador" onChange="testTimer()">
         <div id="blockChain1"></div>
 
@@ -368,7 +370,7 @@
             
           
         }
-        var tope = 300000
+        
         
         function crearBloqueChain(){
           block.insertar(listalquilerT.print(),Transaccion.getMerkleRoot())
@@ -381,8 +383,12 @@
             
             block.graph()
             }
-          
-       
+          function cambiarTiempo(){
+               
+            setInterval("crearBloqueChain()",document.getElementById("tiempo").value);
+            console.log(tope)
+          }
+          var tope = 300000
         setInterval("timer()",1000);
         setInterval("crearBloqueChain()",tope);
       </script>
