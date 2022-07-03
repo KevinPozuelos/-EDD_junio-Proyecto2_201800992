@@ -174,39 +174,114 @@ Utf8.decode = function (strUtf) {
     );
     return strUni;
 }
+
 class Bloque {
-    constructor(rootMerkle) {
+    constructor() {
         this.id = 0;
         this.timestamp = "";
         this.nonce = 0
-        this.preHash = "00"
-        this.rootMerkle = rootMerkle;
+        this.preHash = ""
+        this.rootMerkle = ""
         this.hash = ""
 
     }
-    setdate = () => {
+
+
+    setdataTime = () => {
         var today = new Date();
-        var now = today.toLocaleDateString('en-US')
-        var nowh = today.toLocaleTimeString('en-US');
-        let TimeStamp = now + nowh
-        console.log(TimeStamp.toString())
-        return TimeStamp.toString()
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var yyyy = today.getFullYear();
+        var nowh = today.toLocaleTimeString('en-US')
+        today = dd + '-' + mm + '-' + yyyy + "-::" + nowh;
+        return today
     }
 
+
+
     crearBloque = (merkleRoot) => {
+        this.rootMerkle = merkleRoot
+
         var flag = true;
-        this.timestamp = this.setdate()
-        let cambiarDatos = this.id + timestamp + preHash + merkleRoot
+        this.timestamp = this.setdataTime()
+        let cambiarDatos = this.id + this.timestamp + this.preHash + this.merkleRoot
         while (flag) {
             let aux = (cambiarDatos + this.nonce)
             this.hash = Sha256.hash(aux)
-            if (this.hash.substring(0, 1) == "00") {
+            if (this.hash.substring(0, 2) == ! "00") {
                 this.preHash = this.hash
-                break
+                flag = false
             }
             this.nonce++
         }
+
+
+
         this.id++
+
     }
 }
+
+class NodoBlock {
+    constructor(idblock, hash, preHash, merkleRoot, data, fecha) {
+        this.idblock = idblock;
+        this.hash = hash;
+        this.preHash = preHash;
+        this.merkleRoot = merkleRoot;
+        this.data = data;
+        this.fecha = fecha;
+        this.siguiente = null;
+        console.log("++++++"+this.data)
+    }
+}
+
+class BlockChain {
+    constructor() {
+        this.raiz = null;
+        this.ultimo = null
+        this.bloque = new Bloque()
+    }
+
+    insertar = (data,merkleroot ) => {
+        console.log("-------------" + data)
+        this.bloque.crearBloque(merkleroot)
+       
+        let nuevo = new NodoBlock(this.bloque.id, this.bloque.hash, this.bloque.preHash, this.bloque.rootMerkle, data, this.bloque.timestamp)
+        if (this.raiz == null) {
+            this.raiz = this.ultimo = nuevo
+        } else {
+            this.ultimo.siguiente = nuevo
+            this.ultimo = nuevo
+        }
+    }
+    graph = () => {
+        var codigodot = "digraph G{\nbgcolor=none\nrankdir=LR;\nlabel=\" Usuarios \";\nnode [shape=box];\n nodesep=1;\n" + "node [shape=record fontname=Arial]\n;";
+        var temp = this.raiz
+        var nodes = "";
+        var conexiones = "";
+        var Nnode = 0;
+
+        while (temp != null) {
+            nodes += "N" + Nnode + " [label=\"" + "\\n" + "ID: "+temp.idblock + "\\n" + "HASH: "+temp.hash + "\\n" + "PreHash: "+temp.preHash + "\\n" +"MerkleRoot: " +temp.merkleRoot + "\\n" + "Data: "+temp.data + "\\n" +"Fecha: "+ temp.fecha + "\\n" + "\"];\n";
+            if (temp.siguiente != null) {
+                var auxnum = Nnode + 1;
+                conexiones += "N" + Nnode + " -> N" + auxnum + ";\n";
+            }
+            temp = temp.siguiente
+            Nnode++;
+        }
+        codigodot += "//agregando nodos\n"
+        codigodot += nodes + "\n"
+        codigodot += "//agregando conexiones o flechas\n"
+        codigodot += "\n" + conexiones + "\n}\n}"
+        
+        var svg = d3.select('#blockChain1').graphviz()
+            .width(500)
+            .height(200)
+            .renderDot(codigodot)
+            return console.log(codigodot)
+    }
+}
+
+let block = new BlockChain()
 

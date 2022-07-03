@@ -125,10 +125,13 @@
       </div>
       <div id="blockchain" style="display:none">
         <h4>contador</h4>
+        <button onclick="crearBloqueChainManual()">Crear Bloque</button>
         
         <input id="contador" onChange="testTimer()">
+        <div id="blockChain1"></div>
 
         <div id="merkle"></div>
+
       </div>
 
 
@@ -139,13 +142,15 @@
       <script type="text/javascript" src="./js/Arboles/arbolAvl.js"></script>
       <script type="text/javascript" src="./js/Arboles/bts.js"></script>
       <script type="text/javascript" src="./js/Arboles/arbolMerkle.js"></script>
+      <script type="text/javascript" src="./js/Lineales/transacciones.js"></script>
+      <script type="text/javascript" src="./js/BlockChain/blockChain.js"></script>
 
       <!-- Seccion de Scripts -->
       <script>
 
         
         var Transaccion = new MerkleTree()
-        
+        var listalquilerT = new ListaSimple();
         function processFilesUser(files, Clientes) {
           var file = files[0];
           console.log(file)
@@ -236,6 +241,7 @@
             enablediv3()
             document.getElementById("userLO").textContent = nombre
             Peliculas.Listar();
+           
             Peliculas.ListarComentarios();
             Categorias.graph1()
             console.log("Aceptado")
@@ -273,16 +279,18 @@
         }
 
         function aquilar(valor) {
-          let data = (document.getElementById("userLO").textContent + " - " + valor)
+          let data = (document.getElementById("userLO").textContent + " - " + valor+" ")
           console.log(data)
           document.getElementById(valor).style.display = "none";
           Transaccion.insertar(data)
+          listalquilerT.insertar(document.getElementById("userLO").textContent,valor)
           Transaccion.graficar(0)
         }
         function aquilar1(valor) {
-          let data = (document.getElementById("userLO").textContent + " - " + valor)
+          let data = (document.getElementById("userLO").textContent + " - " + valor +" ")
           Transaccion.insertar(data)
           Transaccion.graficar(0)
+          listalquilerT.insertar(document.getElementById("userLO").textContent,valor)
           console.log(data)
           document.getElementById("1" + valor).style.display = "none";
           return data
@@ -361,17 +369,22 @@
           
         }
         var tope = 300000
-        var alquiler = false
-        function testTimer(){
-            var contador = document.getElementById("contador");
-            cont = 0;
-            contador.value =cont
-           
+        
+        function crearBloqueChain(){
+          block.insertar(listalquilerT.print(),Transaccion.getMerkleRoot())
+          console.log(Transaccion.getMerkleRoot())
+          block.graph()
           }
+
+          function crearBloqueChainManual(){
+            block.insertar(listalquilerT.print(),Transaccion.getMerkleRoot())
+            
+            block.graph()
+            }
           
        
         setInterval("timer()",1000);
-        setInterval("testTimer()",tope);
+        setInterval("crearBloqueChain()",tope);
       </script>
 
     </div>

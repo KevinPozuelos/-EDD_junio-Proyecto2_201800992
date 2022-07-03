@@ -462,7 +462,7 @@ class MerkleTree {
     }
 
     getMerkleRoot() {
-        return console.log("Raiz del arbol de Merkle " + this.raiz.hash)
+        return  this.raiz.hash
     }
 }
 

@@ -1,4 +1,4 @@
-class nodoSimple {
+class nodoSimpleT {
     constructor(username, pAlquiler) {
         this.username = username;
         this.pAlquiler = pAlquiler;
@@ -7,7 +7,7 @@ class nodoSimple {
     }
 }
 
-class ListaSimple {
+class ListaSimpleT {
     constructor() {
         this.raiz = null;
         this.ultimo = null;
@@ -15,7 +15,7 @@ class ListaSimple {
     }
 
     insertar = (username, pAlquiler) => {
-        let nuevo = new nodoSimple(username, pAlquiler);
+        let nuevo = new nodoSimpleT(username, pAlquiler);
         if (this.raiz == null) {
             this.raiz = this.ultimo = nuevo
         } else {
@@ -29,10 +29,15 @@ class ListaSimple {
 
     print = () => {
         let aux = this.raiz;
+        let transaccion ="{"
         while (aux != null) {
             console.log("Nombre de usuario:" + aux.username)
+            transaccion +=   aux.username + "-" + aux.pAlquiler + "\n"
             aux = aux.siguiente
+            
         }
+        transaccion += "}"
+        return transaccion+""
     }
 
     buscar = (nombre_usuario, pw) => {
@@ -49,28 +54,6 @@ class ListaSimple {
         }
     }
 
-    graph = () => {
-        var codigodot = "digraph G{\nbgcolor=none\nrankdir=LR;\nlabel=\" Usuarios \";\nnode [shape=box];\n nodesep=1;\n" + "node [shape=record fontname=Arial]\n;";
-        var temp = this.raiz
-        var nodes = "";
-        var conexiones = "";
-        var Nnode = 0;
-
-        while(temp != null){
-            nodes += "N" + Nnode + " [label=\"" + "\\n" + temp.username + "\\n" + temp.pAlquiler +"\\n" +"\"];\n";
-            if(temp.siguiente != null){
-                var auxnum = Nnode + 1;
-                conexiones += "N" + Nnode + " -> N" + auxnum + ";\n";
-            }
-            temp = temp.siguiente
-            Nnode++;
-        }
-        codigodot += "//agregando nodos\n"
-        codigodot += nodes + "\n"
-        codigodot += "//agregando conexiones o flechas\n"
-        codigodot += "\n" + conexiones + "\n}\n}"
-       
-    }
+    
 }
-let alquiler = new ListaSimple();
 
